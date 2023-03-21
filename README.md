@@ -88,3 +88,132 @@ function sumOf(numbers) {
 
 exports.sumOf = sumOf;
 ```
+
+## TDD
+
+TDD(Test Driven Development)는 테스트 주도 개발이라는 의미로,
+테스트가 개발을 이끌어 나가는 형태의 개발론을 의미한다.
+
+선 테스트 코드 작성 -> 후 구현이며
+실패, 성공, 리팩토링 3가지 절차로 이뤄져 있다.
+
+### 실패
+
+첫 번째 절차는 실패다. 의미는 실패하는 테스트 케이스를 먼저 만들라는 것이다. 실패하는 테스트 케이스를 만들 때는 프로젝트의 전체 기능에 대해 처음부터 모든 테스크 케이스를 작성하는 것이 아닌,
+
+현재 가장 필요하고 구현해야할 기능을 하나씩 테스트 케이스를 작성하는 것이다.
+
+### 성공
+
+두 번째 절차는 성공이다. 실패한 테스트 케이스를 통과시키기 위하여 코드를 작성한다.
+
+### 리팩터링
+
+마지막 절차는 리팩토링이다. 테스트가 성공했다면 성공에 그치지 말고 리팩토링을 하여 코드를 개선할 필요가 있기 때문이다.
+
+### 리팩터링 시 주의할 점
+
+마틴 파울러에 의하면 기능구현 모자, 리팩토링 모자를 잘 구분해야 한다고 한다. 리팩토링 시, 눈에 밟히는 기능 구현 부분이 있을 때 경계 해야 한다.
+그리고, 마틴 파울러가 말하듯이 리팩토링의 시작 점은 코드의 악취가 날 때, 3의 법칙 혹은 2의 법칙을 만났을 때 시작해야 한다.
+
+1. 처음에는 그냥 한다.
+2. 처음 비슷한 일의 중복이 생겼다는 사실을 알았을 때는 넘어가자
+3. 비스한 일을 한 번 더 반복한다면 그 때 리팩터링을 하자.
+
+단, 지저분한 코드를 발생해도 굳이 수정할 필요가 없다면 하지 말자, 그리고 리팩터링보다 새 코드를 작성하는 편이 나을 때는 하지 말자
+
+## TDD 연습
+
+### 최댓값 구하기
+
+```js
+// stats.test.js
+
+const stats = require('../code/stats');
+
+// max 함수 배열의 최댓값 구하는 테스터
+describe('stats', () => {
+    it('gets maxium value', () => {
+        expect(stats.max([1, 2, 3, 4])).toBe(4);
+    });
+});
+
+// stats.js
+
+exports.max = (numbers) => {
+    let result = numbers[0];
+    numbers.forEach((n) => {
+        if (n > result) {
+            result = n;
+        }
+    });
+    return result;
+};
+
+// 테스트 완료 후 리팩터링
+
+exports.max = (numbers) => {
+    // return Math.max(...numbers);
+    // return numbers.reduce((acc, cur) => Math.max(acc, cur));
+    return numbers.sort((a, b) => b - a)[0];
+};
+```
+
+### 주어진 배열에서 최솟값을 구하라. 단, 숫자가 2보다 작을 경우 -1을 리턴
+
+```js
+// stats.test.js
+
+describe('stats', () => {
+    it('gets minium value. but if the num is smaller than 2 , return -1', () => {
+        expect(stats.min([1, -2, -10])).toBe(-1);
+    });
+});
+
+// stats.js
+
+exports.min = (numbers) => {
+    let result = numbers.sort((a, b) => a - b)[0];
+    numbers.forEach((num) => {
+        if (num < result) {
+            result = num;
+        } else if (num < 2) {
+            result = -1;
+        }
+    });
+    return result;
+};
+
+// 테스트 통과 후 리팩터링
+exports.min = (numbers) => {
+    return numbers.reduce((acc, cur) => {
+        let miniumNum = Math.min(acc, cur);
+        return miniumNum > 2 ? miniumNum : -1;
+    });
+};
+```
+
+```js
+// 테스터 연속 실행
+
+const stats = require('../code/stats');
+
+// max 함수 배열의 최댓값 구하는 테스터
+// min 함수를 구하지만 2보다 작을 땐 -1을 리턴하는 테스터
+describe('stats', () => {
+    it('gets maxium value', () => {
+        expect(stats.max([1, 2, 3, 4])).toBe(4);
+    });
+    it('gets minium value. but if the num is smaller than 2 , return -1', () => {
+        expect(stats.min([1, -2, -10])).toBe(-1);
+    });
+});
+```
+
+### 결과값
+
+<img src="./image/statstester.png">
+
+## 참고 자료
+
+https://learn-react-test.vlpt.us/#/02-tdd-introduction
